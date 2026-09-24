@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>CONTACT INTERFACE v2026.0.1</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+
+    <style>
+        :root { --green: #00ff00; --white: #f0f0f0; }
+        * { box-sizing: border-box; }
+        html, body { min-height: 100%; }
+        body { margin: 0; overflow-x: hidden; color: var(--green); background: #000; font-family: "Courier New", Consolas, monospace; }
+
+        #matrix { position: fixed; z-index: 0; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; background: #000; }
+        body::after { position: fixed; z-index: 1; inset: 0; pointer-events: none; content: ""; background: radial-gradient(ellipse at center, transparent 25%, rgba(0, 0, 0, .76) 100%); }
+        .scanlines { position: fixed; z-index: 10; inset: 0; pointer-events: none; opacity: .11; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0, 255, 0, .12) 4px); }
+
+        .page { position: relative; z-index: 2; width: min(100% - 28px, 980px); margin: 0 auto; padding: 54px 0 34px; }
+        .terminal-window { overflow: hidden; border: 1px solid var(--green); border-radius: 8px; background: rgba(0, 0, 0, .80); box-shadow: 0 0 20px rgba(0, 255, 0, .22), inset 0 0 45px rgba(0, 255, 0, .05); }
+        .terminal-bar { display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 8px 13px; border-bottom: 1px solid rgba(0, 255, 0, .3); color: var(--green); background: rgba(0, 255, 0, .06); font-size: 12px; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .terminal-bar span:last-child { margin-left: 8px; }
+        main { padding: 35px clamp(18px, 5vw, 55px) 42px; }
+
+        .interface-title { position: relative; display: inline-block; width: 100%; margin: 0; color: var(--green); font-size: clamp(23px, 5vw, 48px); font-weight: 700; line-height: 1.05; letter-spacing: .055em; text-align: center; white-space: nowrap; text-shadow: 0 0 2px var(--green), 0 0 7px var(--green), 0 0 15px rgba(0, 255, 0, .9); }
+        .neural-title::before, .neural-title::after { position: absolute; top: 0; left: 0; width: 100%; height: 100%; content: attr(data-text); color: var(--green); pointer-events: none; white-space: nowrap; }
+        .neural-title::before { left: 2px; text-shadow: -2px 0 #ff00ff; clip: rect(44px, 9999px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+        .neural-title::after { left: -2px; text-shadow: -2px 2px #00ffff; clip: rect(44px, 9999px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+        @keyframes glitch-anim { 0%{clip:rect(42px,9999px,44px,0)}5%{clip:rect(12px,9999px,59px,0)}10%{clip:rect(48px,9999px,29px,0)}15%{clip:rect(42px,9999px,73px,0)}20%{clip:rect(63px,9999px,27px,0)}25%{clip:rect(34px,9999px,55px,0)}30%{clip:rect(86px,9999px,73px,0)}35%{clip:rect(20px,9999px,55px,0)}40%{clip:rect(64px,9999px,29px,0)}45%{clip:rect(73px,9999px,64px,0)}50%{clip:rect(18px,9999px,37px,0)}55%{clip:rect(45px,9999px,23px,0)}60%{clip:rect(42px,9999px,73px,0)}65%{clip:rect(31px,9999px,58px,0)}70%{clip:rect(21px,9999px,47px,0)}75%{clip:rect(44px,9999px,64px,0)}80%{clip:rect(33px,9999px,29px,0)}85%{clip:rect(17px,9999px,23px,0)}90%{clip:rect(40px,9999px,46px,0)}95%{clip:rect(28px,9999px,25px,0)}100%{clip:rect(57px,9999px,34px,0)} }
+        @keyframes glitch-anim2 { 0%{clip:rect(65px,9999px,86px,0)}5%{clip:rect(10px,9999px,43px,0)}10%{clip:rect(22px,9999px,70px,0)}15%{clip:rect(63px,9999px,85px,0)}20%{clip:rect(34px,9999px,20px,0)}25%{clip:rect(74px,9999px,36px,0)}30%{clip:rect(28px,9999px,100px,0)}35%{clip:rect(26px,9999px,74px,0)}40%{clip:rect(59px,9999px,80px,0)}45%{clip:rect(100px,9999px,60px,0)}50%{clip:rect(20px,9999px,83px,0)}55%{clip:rect(47px,9999px,40px,0)}60%{clip:rect(41px,9999px,21px,0)}65%{clip:rect(63px,9999px,87px,0)}70%{clip:rect(27px,9999px,44px,0)}75%{clip:rect(74px,9999px,100px,0)}80%{clip:rect(36px,9999px,32px,0)}85%{clip:rect(20px,9999px,47px,0)}90%{clip:rect(100px,9999px,100px,0)}95%{clip:rect(63px,9999px,20px,0)}100%{clip:rect(48px,9999px,30px,0)} }
+
+        .subtitle { margin: 13px 0 0; color: var(--white); font-size: clamp(13px, 2vw, 18px); letter-spacing: .12em; text-align: center; text-shadow: 0 0 8px rgba(255,255,255,.5); }
+        .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(285px, 340px); gap: 45px; align-items: center; margin-top: 48px; }
+        .terminal-output { min-width: 0; color: var(--green); font-size: clamp(13px, 1.55vw, 16px); line-height: 1.65; text-shadow: 0 0 7px rgba(0,255,0,.42); }
+        .prompt, .line, .info, .contact-line, .contact-tag { color: var(--green); }
+        .command { margin: 22px 0 5px; color: var(--white); }
+        .contact-line { margin: 10px 0; }
+        .contact-value { color: var(--green); font-weight: 700; }
+        .cursor { display: inline-block; width: .62em; height: 1em; margin-left: 3px; vertical-align: -.13em; background: var(--green); box-shadow: 0 0 9px var(--green); animation: blink 1s steps(2, jump-none) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .qr-column { display: flex; flex-direction: column; align-items: center; gap: 17px; color: var(--green); }
+
+        /* Kontener jest zaokrąglony i świeci, ale sam QR pozostaje pełnym kwadratem. */
+        #qrcode {
+            position: relative;
+            display: grid;
+            width: min(100%, 320px);
+            height: 320px;
+            place-items: center;
+            padding: 12px;
+            overflow: visible;
+            border: 7px solid rgba(0,255,0,.34);
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 0 0 2px #008800, 0 0 18px #00ff00, 0 0 55px rgba(0,255,0,.42);
+        }
+
+        #qrcode canvas { display: block; width: 100% !important; height: 100% !important; }
+
+        /* Biała maska usuwa moduły spod logo; logo jest małe dla pewnego skanowania. */
+        .qr-logo-mask {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            width: 21%;
+            aspect-ratio: 1;
+            border-radius: 14px;
+            background: #fff;
+            transform: translate(-50%, -50%);
+        }
+
+        .qr-logo {
+            position: absolute;
+            z-index: 3;
+            top: 50%;
+            left: 50%;
+            width: 16%;
+            height: 16%;
+            padding: 3px;
+            object-fit: contain;
+            pointer-events: none;
+            background: #fff;
+            border-radius: 9px;
+            transform: translate(-50%, -50%);
+        }
+
+        .qr-text { margin: 0; color: var(--green); font-size: 12px; text-align: center; text-shadow: 0 0 6px var(--green); }
+        .actions { margin-top: 38px; text-align: center; }
+        .button { position: relative; display: inline-block; overflow: hidden; margin: 10px 5px; padding: 10px 20px; border: 1px solid #00ff00; color: #00ff00; background: rgba(0,255,0,.1); font: 16px "Courier New", monospace; line-height: 1.4; text-decoration: none; cursor: pointer; transition: all .3s ease; }
+        .button:hover { background: rgba(0,255,0,.2); box-shadow: 0 0 15px #00ff00; transform: translateY(-2px); }
+        .button::before { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; content: ""; background: linear-gradient(90deg, transparent, rgba(0,255,0,.3), transparent); transition: .5s; }
+        .button:hover::before { left: 100%; }
+        footer { margin-top: 32px; color: rgba(0,255,0,.7); font-size: 11px; text-align: center; letter-spacing: .08em; }
+
+        @media (max-width: 760px) {
+            .page { width: min(100% - 18px, 560px); padding-top: 20px; }
+            main { padding: 27px 18px 30px; }
+            .interface-title { font-size: clamp(19px, 6.2vw, 35px); letter-spacing: .025em; }
+            .content-grid { grid-template-columns: 1fr; gap: 35px; margin-top: 32px; }
+            .qr-column { order: -1; }
+            #qrcode { width: min(82vw, 320px); height: min(82vw, 320px); }
+            .button { display: block; width: min(80%, 280px); margin: 8px auto; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix" aria-hidden="true"></canvas>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <div class="page">
+        <section class="terminal-window">
+            <div class="terminal-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>root@contact-system:~</span></div>
+            <main>
+                <header>
+                    <h1 class="interface-title neural-title" data-text="CONTACT INTERFACE v2026.0.1">CONTACT INTERFACE v2026.0.1</h1>
+                    <p class="subtitle">// ZERO TRUST CONNECTION &amp; RELATION</p>
+                </header>
+
+                <div class="content-grid">
+                    <section class="terminal-output" aria-label="Contact details">
+                        <div class="prompt">root@contact-system:~#<span class="cursor"></span></div>
+                        <div class="command">accessing contact database...</div>
+                        <div class="line info">[INFO] Firewall status: Active</div>
+                        <div class="line info">[INFO] Database loaded successfully</div>
+                        <div class="line info">[INFO] Encryption key verified</div>
+                        <div class="line info">[INFO] Access level: ADMIN-LEVEL</div>
+                        <div class="command">listing contact details...</div>
+                        <div class="contact-line"><span class="contact-tag">[CONTACT]</span> <span class="contact-value">Name: Tomasz Omelaniuk</span></div>
+                        <div class="contact-line"><span class="contact-tag">[CONTACT]</span> <span class="contact-value">Email: tomasz.omelaniuk@hp.com</span></div>
+                        <div class="contact-line"><span class="contact-tag">[CONTACT]</span> <span class="contact-value">Phone: +48 xxx yyy zzz</span></div>
+                        <div class="contact-line"><span class="contact-tag">[CONTACT]</span> <span class="contact-value">Location: Warsaw, Poland</span></div>
+                        <div class="contact-line"><span class="contact-tag">[CONTACT]</span> <span class="contact-value">Company: HP Inc.</span></div>
+                        <div class="line info">[INFO] DEPARTMENT: PERSONAL SYSTEMS</div>
+                        <div class="line info">[INFO] ROLE: PRESALES TC</div>
+                        <div class="line info">[INFO] FOCUS: HW/SW/SECURITY/AI</div>
+                        <div class="line info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENDPOINT MANAGEMENT</div>
+                    </section>
+
+                    <aside class="qr-column">
+                        <div>SCAN THE CODE...</div>
+                        <div id="qrcode" aria-label="vCard QR Code"></div>
+                        <p class="qr-text">(*) vCard QR Code with all contact details</p>
+                    </aside>
+                </div>
+
+                <div class="actions"><a class="button" href="https://www.linkedin.com/in/tomaszomelaniuk" target="_blank" rel="noopener noreferrer">ENTER THE MATRIX</a></div>
+            </main>
+        </section>
+        <footer>© 2026 TOMASZ OMELANIUK | SECURE CONNECTION ESTABLISHED | ENCRYPTION: AES-256 | STATUS: ONLINE</footer>
+    </div>
+
+    <script>
+        const vCard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            'N:Omelaniuk;Tomasz;;;',
+            'FN:Tomasz Omelaniuk',
+            'ORG:HP Inc.',
+            'EMAIL:tomasz.omelaniuk@hp.com',
+            'TEL:+48xxx yyy zzz',
+            'ADR:;;Warsaw;;;Poland',
+            'END:VCARD'
+        ].join('\n');
+
+        const qrContainer = document.getElementById('qrcode');
+
+        /* Klasyczny czarny QR na białym tle: maksymalna czytelność skanerów. */
+        const qr = new QRCodeStyling({
+            width: 296,
+            height: 296,
+            type: 'canvas',
+            data: vCard,
+            
+            qrOptions: { errorCorrectionLevel: 'H' },
+            dotsOptions: { type: 'square', color: '#000000' },
+            cornersSquareOptions: { type: 'square', color: '#000000' },
+            cornersDotOptions: { type: 'square', color: '#000000' },
+            backgroundOptions: { color: '#ffffff' }
+        });
+
+        qr.append(qrContainer);
+
+        /* Nakładka jest mała, ma osobną białą maskę i nie zasłania narożników QR. */
+        const logoMask = document.createElement('div');
+        logoMask.className = 'qr-logo-mask';
+
+        const logo = document.createElement('img');
+        logo.className = 'qr-logo';
+        logo.src = './hp-logo.png';
+        logo.alt = 'HP logo';
+
+        qrContainer.append(logoMask, logo);
+
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        const glyphs = 'アァカサタナハマヤャラワガザダバパ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>[]{}$#@%&';
+        let columns = 0;
+        let drops = [];
+        let fontSize = 16;
+
+        function resizeMatrix() {
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            canvas.width = Math.floor(width * ratio);
+            canvas.height = Math.floor(height * ratio);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            fontSize = width < 600 ? 13 : 16;
+            columns = Math.ceil(width / (fontSize * 2));
+            drops = Array.from({ length: columns }, () => Math.random() * -80);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        let lastFrame = 0;
+        const frameInterval = 45;
+
+        function drawMatrix(timestamp) {
+            requestAnimationFrame(drawMatrix);
+            if (timestamp - lastFrame < frameInterval) return;
+            lastFrame = timestamp;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            ctx.fillStyle = 'rgba(0, 0, 0, .16)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < columns; i++) {
+                const char = glyphs[Math.floor(Math.random() * glyphs.length)];
+                const x = i * fontSize * 2;
+                const y = drops[i] * fontSize;
+                ctx.fillStyle = Math.random() > .985 ? '#ffffff' : 'rgba(0, 184, 0, .62)';
+                ctx.fillText(char, x, y);
+                if (y > height && Math.random() > .975) drops[i] = Math.random() * -30;
+                drops[i] += .25;
+            }
+        }
+
+        window.addEventListener('resize', resizeMatrix, { passive: true });
+        resizeMatrix();
+        requestAnimationFrame(drawMatrix);
+    </script>
+</body>
+</html>
